@@ -1,0 +1,19 @@
+{
+    "name": "ideasonpurpose/wp-vimeo-embed",
+    "description": "Vimeo embedding functions and shortcodes",
+    "license": "ISC",
+    "keywords": ["wordpress", "vimeo", "video", "Ideas On Purpose"],
+    "authors": [
+        {
+            "name": "Joe Maller",
+            "email": "joe@ideasonpurpose.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "ideasonpurpose\\": "src"
+        }
+    }
+}
