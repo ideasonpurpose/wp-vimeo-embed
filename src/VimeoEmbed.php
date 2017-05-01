@@ -88,7 +88,7 @@ class VimeoEmbed
             // return sprintf("\n\n\n<!-- API Error: %s (Vimeo embed) -->\n\n", (@$data->developer_message2) ?: $data->error);
         }
 
-        return sprintf('<a href="http://vimeo.com/%1$s" data-remote="http://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $data->id) .
+        return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $data->id) .
         // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $data->id) .
         // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $data->id) .
         $this->getImgSrcSetTag($data) .
