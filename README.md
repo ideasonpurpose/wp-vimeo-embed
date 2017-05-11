@@ -1,5 +1,5 @@
 # wp-vimeo-embed
-#### Version: 0.0.0
+#### Version: 0.0.2
 
 [![Build Status](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed.svg?branch=master)](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed)
 
