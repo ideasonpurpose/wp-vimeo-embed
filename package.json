@@ -1,7 +1,7 @@
 {
   "name": "wp-vimeo-embed",
   "version": "0.0.1",
-  "description": "A collection of Vimeo embed tools and shortcodes",
+  "description": "A collection of Vimeo embed tools and shortcodes for use in WordPress themes.",
   "main": "index.js",
   "directories": {
     "test": "tests"
@@ -23,6 +23,7 @@
   ],
   "author": "Joe Maller <joe@joemaller.com> (http://www.joemaller.com)",
   "license": "MIT",
+  "version_files": ["README.md"],
   "bugs": {
     "url": "https://github.com/ideasonpurpose/wp-vimeo-embed/issues"
   },

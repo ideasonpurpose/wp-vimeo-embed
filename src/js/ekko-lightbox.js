@@ -2,7 +2,8 @@
  * This is a temporary tweak to the Ekko-Lightbox JS module to fix hard-coded
  * Vimeo modal widths. Line 387 was changed.
  *
- * Waiting for https://github.com/ashleydw/lightbox/issues/244 to be merged
+ * Waiting for https://github.com/ashleydw/lightbox/issues/244 to be merged.
+ * Will be replaced with the CDN copy once #244 is merged.
  *
  * Ref:
  * https://github.com/ashleydw/lightbox/issues/247

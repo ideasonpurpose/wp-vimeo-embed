@@ -21,4 +21,14 @@ class VimeoEmbedTest extends TestCase
         $this->assertTrue(WP_DEBUG);
     }
 
+    // It should wrap Vimeo's embed code
+
+    // It should Create a video tag embed
+    // it should create a video tag embed with the loop attribute
+    // it should create a video tag embed with the autoplay attribute
+    // it should ignore case of loop and autoplay attributes
+    //
+    // it should embed a lightbox link
+    // it should fail on network errors
+    // it should fail on API errors
 }
