@@ -1,0 +1,33 @@
+{
+  "name": "wp-vimeo-embed",
+  "version": "0.0.0",
+  "description": "A collection of Vimeo embed tools and shortcodes",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "phpunit --colors=always tests",
+    "version": "version-everything && git add -u",
+    "watch": "watch -f '**/*.php' -r 'phpunit --colors=always tests'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ideasonpurpose/wp-vimeo-embed.git"
+  },
+  "keywords": [
+    "vimeo",
+    "wordpress",
+    "video",
+    "ideasonpurpose"
+  ],
+  "author": "Joe Maller <joe@joemaller.com> (http://www.joemaller.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ideasonpurpose/wp-vimeo-embed/issues"
+  },
+  "homepage": "https://github.com/ideasonpurpose/wp-vimeo-embed#readme",
+  "devDependencies": {
+    "version-everything": "^0.1.2"
+  }
+}

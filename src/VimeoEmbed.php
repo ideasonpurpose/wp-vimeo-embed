@@ -2,6 +2,17 @@
 
 namespace ideasonpurpose;
 
+/**
+ * version: 0.0.0
+ *
+ * Shortcode takes arguments:
+ * [vimeo 1234567]   -- straight embed, stretches to 100% width
+ * [vimeo 1234567 loop] -- video tag embed, loops
+ * [vimeo 1234567 autoplay] -- video tag embed, autoplay
+ * [vimeo 1234567 loop autoplay] -- video tag embed, loops and autoplays
+ * [vimeo 1234567 AutoPlay LOoP] -- same as above (order and case don't matter)
+ * [vimeo 1234567 lightbox] -- standard embed plays in lightbox
+ */
 class VimeoEmbed
 {
     /**
@@ -15,11 +26,6 @@ class VimeoEmbed
         add_action('wp_enqueue_scripts',  [$this, 'loadLightbox']);
     }
 
-    /**
-     * simple wrapper, throws errors if WP_DEBUG, otherwise prints an html comment
-     * @param  string $err the error to maybe throw
-     */
-
 
     public function loadLightbox()
     {
@@ -28,6 +34,10 @@ class VimeoEmbed
         // wp_enqueue_script('ekko-lightbox', '/node_modules/ekko-lightbox/dist/ekko-lightbox.js', array('jquery'), '20120206', true);
     }
 
+    /**
+     * simple wrapper, throws errors if WP_DEBUG, otherwise prints an html comment
+     * @param  string $err the error to maybe throw
+     */
     private function throwError($err)
     {
         if (WP_DEBUG) {
@@ -72,21 +82,19 @@ class VimeoEmbed
     {
         $data = $this->getVimeoData($vID);
 
-        /**
-         * Handle total network failure
-         */
-        if ($data instanceof \Requests_Exception) {
-            return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
-              // return sprintf("\n\n\n<!-- Network Error: %s (Vimeo embed) -->\n\n", $data->getMessage());
-        }
+        // /**
+        //  * Handle total network failure
+        //  */
+        // if ($data instanceof \Requests_Exception) {
+        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
+        // }
 
-        /**
-         * Handle API errors (this happened)
-         */
-        if (property_exists($data, 'error')) {
-            return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
-            // return sprintf("\n\n\n<!-- API Error: %s (Vimeo embed) -->\n\n", (@$data->developer_message2) ?: $data->error);
-        }
+        // /**
+        //  * Handle API errors (this happened)
+        //  */
+        // if (property_exists($data, 'error')) {
+        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
+        // }
 
         return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $data->id) .
         // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $data->id) .
@@ -106,36 +114,36 @@ class VimeoEmbed
         if (!$atts[0]) {
             return;
         }
-        $vID = $atts[0];
+        $vID = array_shift($atts);
+        $atts = array_map('strtolower', $atts); // normalize attribute case
         $data = $this->getVimeoData($vID);
-        // Example API error response:
-        // $data = unserialize('O:8:"stdClass":5:{s:5:"error";s:21:"You have been banned.";s:4:"link";N;s:17:"developer_message";s:65:"You have been banned. Contact vimeo support for more information.";s:10:"error_code";i:3500;s:2:"id";s:15:"vimeo_180818116";}');
 
-        /**
-         * Handle total network failure
-         */
-        if ($data instanceof \Requests_Exception) {
-            return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
-              // return sprintf("\n\n\n<!-- Network Error: %s (Vimeo embed) -->\n\n", $data->getMessage());
-        }
+        // /**
+        //  * Handle total network failure
+        //  */
+        // if ($data instanceof \Requests_Exception) {
+        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
+        // }
 
-        /**
-         * Handle API errors (this happened)
-         */
-        if (property_exists($data, 'error')) {
-            return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
-            // return sprintf("\n\n\n<!-- API Error: %s (Vimeo embed) -->\n\n", (@$data->developer_message2) ?: $data->error);
-        }
+        // /**
+        //  * Handle API errors (this happened)
+        //  */
+        // if (property_exists($data, 'error')) {
+        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
+        // }
+
+        $loop = (in_array('loop', $atts)) ? 'loop' : '';
 
         $output = sprintf(
             '<div class="embed-container" style="padding-bottom: %.5f%%;">',
             $data->height/$data->width * 100
         );
         $output .= sprintf(
-            '<video autoplay muted playsinline id="%s" data-pictures="%s" data-files="%s"></video>',
+            '<video autoplay muted playsinline id="%s" data-pictures="%s" data-files="%s" %s></video>',
             $data->id,
             htmlentities(json_encode($data->pictures->sizes), ENT_QUOTES, 'UTF-8'),
-            htmlentities(json_encode($data->files), ENT_QUOTES, 'UTF-8')
+            htmlentities(json_encode($data->files), ENT_QUOTES, 'UTF-8'),
+            $loop
         );
         $output .= '</div>';
 
@@ -149,8 +157,16 @@ class VimeoEmbed
      */
     public function getVimeoData($videoID)
     {
+
         if (!is_numeric($videoID) && preg_match('#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#', $videoID, $match)) {
             $videoID = $match[1];
+        }
+
+        /**
+         * Handle bad input
+         */
+        if (!$videoID) {
+            return $this->throwError("VimeoEmbed Error: Missing Input");
         }
 
         $transientID = "vimeo_$videoID";
@@ -175,6 +191,23 @@ class VimeoEmbed
             } catch (\Requests_Exception $e) {
                 $vimeoInfo = $e;
             }
+
+            /**
+             * Handle total network failure
+             */
+            if ($vimeoInfo instanceof \Requests_Exception) {
+                return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoInfo->getMessage()));
+            }
+
+            /**
+             * Handle API errors (this happened)
+             * Example API error response:
+             * $data = unserialize('O:8:"stdClass":5:{s:5:"error";s:21:"You have been banned.";s:4:"link";N;s:17:"developer_message";s:65:"You have been banned. Contact vimeo support for more information.";s:10:"error_code";i:3500;s:2:"id";s:15:"vimeo_180818116";}');
+             */
+            if (property_exists($vimeoInfo, 'error')) {
+                return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoInfo->developer_message2) ?: $vimeoInfo->error));
+            }
+
         }
         return $vimeoInfo;
     }
