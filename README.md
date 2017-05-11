@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed.svg?branch=master)](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed)
 
-A collection of Vimeo embed tools and shortcodes for use in WordPress themes
+A collection of Vimeo embed tools and shortcodes for use in WordPress themes.
 
 ## Shortcodes
 The following shortcodes will be supported:
