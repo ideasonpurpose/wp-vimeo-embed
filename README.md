@@ -25,12 +25,39 @@ $vimeo->lightbox($vimeoID);
 ```
 The library should be initialized with a Vimeo API token:
 
-use ideasonpurpose/VimeoEmbed;
+    use ideasonpurpose/VimeoEmbed;
 
 $vimeo = new VimeoEmbed('a1234a2bbdcc9d43250b2aefcff944ce');
 
-$vimeo->embed('1234567');
+    $vimeo->embed('1234567');
 
 Or, using the output directly from ACF Pro's oEmbed field:
 
-$vimeo->wrap
+    $vimeo->wrap(get_field('video'));
+
+
+## Usage
+
+This library is not on Packagist yet, so Composer needs to be told where to find it. Add this to the `composer.json` `repositories` key:
+
+```json
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ideasonpurpose/wp-vimeo-embed"
+    }
+  ]
+```
+
+Then tell Composer to load the package:
+
+```
+$ composer require ideasonpurpose/wp-vimeo-embed
+```
+
+Then initialize the code with a a Vimeo API token:
+```php
+use ideasonpurpose/VimeoEmbed;
+
+$vimeo = new VimeoEmbed('1234567890abcdef0000000000000000');
+```

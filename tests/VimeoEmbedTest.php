@@ -101,7 +101,7 @@ class VimeoEmbedTest extends TestCase
      *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
-     * @expectedException Error
+     * @expectedException \Error
      */
     public function testGetVimeoIdFailWithError()
     {
