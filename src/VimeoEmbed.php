@@ -59,7 +59,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     public function throwError($err)
     {
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            throw new \Error($err);
+            throw new \Exception($err);
         } else {
             return sprintf("\n\n\n<!-- %s -->\n\n", $err);
         }
@@ -154,6 +154,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $vID = array_shift($atts);
         $atts = array_map('strtolower', $atts); // normalize attribute case
         $data = $this->getVimeoData($vID);
+        d($data);
 
         $loop = (in_array('loop', $atts)) ? 'loop' : '';
         $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';

@@ -97,13 +97,13 @@ class VimeoEmbedTest extends TestCase
     }
 
     /**
-     * It should throw an error with bad data and WP_DEBUG set
+     * It should throw an exception with bad data and WP_DEBUG set
      *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
-     * @expectedException \Error
+     * @expectedException \Exception
      */
-    public function testGetVimeoIdFailWithError()
+    public function testGetVimeoIdFailWithException()
     {
         define('WP_DEBUG', true);
         global $stub;
