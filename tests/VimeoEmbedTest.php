@@ -5,30 +5,146 @@ namespace ideasonpurpose;
 use PHPUnit\Framework\TestCase;
 
 require_once(realpath(__DIR__ . '/../src/VimeoEmbed.php'));
-// require_once('GoogleAnalyticsMocks.php');
+require_once(realpath(__DIR__ . '/../vendor/rmccue/requests/library/Requests.php'));
 
-// define('WP_DEBUG', true);
+
+function set_transient($id, $time)
+{
+    return true;
+}
+function delete_transient($id)
+{
+    return true;
+}
+
+// It should wrap Vimeo's embed code
+
+// It should Create a video tag embed
+// it should create a video tag embed with the loop attribute
+// it should create a video tag embed with the autoplay attribute
+// it should ignore case of loop and autoplay attributes
+//
+// it should embed a lightbox link
+// t should include javascript files with lightbox
+//
+// it should make a Vimeo API request
+// it should store the API response in a transient
+// it should fail on network errors
+
 
 class VimeoEmbedTest extends TestCase
 {
     /**
+     * Make sure tests are working
+     */
+    public function test()
+    {
+        $this->assertTrue(true);
+    }
+
+    /**
+     * @before
+     */
+    public function setupStub()
+    {
+        global $stub;
+        $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
+            ->disableOriginalConstructor()
+            ->setMethods(['apiGet'])
+            ->getMock();
+
+        $stub->method('apiGet')
+            ->willReturn((object)['name' => 'vimeo' ]);
+    }
+
+    /**
+     * It should return strings that might be Vimeo IDs
+     *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
      */
-    public function testWP_DEBUGTrue()
+    public function testGetVimeoIdFromVimeoID()
     {
-        define('WP_DEBUG', true);
-        $this->assertTrue(WP_DEBUG);
+        global $stub;
+        function get_transient($id)
+        {
+            return false;
+        }
+
+        $this->assertEquals('123456', $stub->getVimeoData(123456)->id);
+        $this->assertEquals('123456', $stub->getVimeoData('123456')->id);
+        $this->assertEquals('notAnId', $stub->getVimeoData('notAnId')->id);
     }
 
-    // It should wrap Vimeo's embed code
+    /**
+     * It should extract a Vimeo ID from oEmbed code blobs
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testGetVimeoIdFromEmbedCode()
+    {
+        global $stub;
+        function get_transient($id)
+        {
+            return false;
+        }
+        $oEmbedBlob = '<iframe src="https://player.vimeo.com/video/216711407" width="519" height="390" frameborder="0" title="Navigators 2016 Digital Annual Report" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+        $this->assertEquals('216711407', $stub->getVimeoData($oEmbedBlob)->id);
 
-    // It should Create a video tag embed
-    // it should create a video tag embed with the loop attribute
-    // it should create a video tag embed with the autoplay attribute
-    // it should ignore case of loop and autoplay attributes
-    //
-    // it should embed a lightbox link
-    // it should fail on network errors
-    // it should fail on API errors
+        $oEmbedBlob = '<iframe src="https://player.vimeo.com/video/2822787?color=ffffff&title=0&portrait=0" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+        $this->assertEquals('2822787', $stub->getVimeoData($oEmbedBlob)->id);
+    }
+
+    /**
+     * It should throw an error with bad data and WP_DEBUG set
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     * @expectedException Error
+     */
+    public function testGetVimeoIdFailWithError()
+    {
+        define('WP_DEBUG', true);
+        global $stub;
+        $stub->getVimeoData(null);
+        $stub->getVimeoData('');
+    }
+
+    /**
+     * It should return the error wrapped in a comment
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+          */
+    public function testGetVimeoIdFailWithComment()
+    {
+        global $stub;
+        $this->assertRegExp('/<!--/', $stub->getVimeoData(null));
+        $this->assertRegExp('/<!--/', $stub->getVimeoData(''));
+    }
+
+    /**
+     * It should catch Vimeo API Errors
+     *
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testVimeoAPIError()
+    {
+        function get_transient($id)
+        {
+            return false;
+        }
+
+        $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
+            ->disableOriginalConstructor()
+            ->setMethods(['apiGet'])
+            ->getMock();
+
+        $stub->method('apiGet')
+            ->willReturn((object)['name' => 'vimeo', 'error' => 'API Error' ]);
+
+        $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
+    }
 }

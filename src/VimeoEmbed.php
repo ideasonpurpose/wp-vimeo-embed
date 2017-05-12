@@ -23,24 +23,42 @@ class VimeoEmbed
     {
         $this->token = $auth_token;
         add_shortcode('vimeo', [$this, 'vimeoEmbed']);
-        add_action('wp_enqueue_scripts',  [$this, 'loadLightbox']);
+        add_action('wp_enqueue_scripts',  [$this, 'loadLightboxAssets']);
     }
 
-
-    public function loadLightbox()
+    public function loadLightboxAssets()
     {
         wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css');
         // wp_enqueue_script('ekko-lightbox', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.js', array('jquery'), '20120206', true);
         // wp_enqueue_script('ekko-lightbox', '/node_modules/ekko-lightbox/dist/ekko-lightbox.js', array('jquery'), '20120206', true);
+
+        /*
+
+        This code snippet should be injected to enable
+const $ = window.jQuery;
+
+
+require('../../vendor/ideasonpurpose/wp-vimeo-embed/src/js/ekko-lightbox');
+
+
+$(document).on('click', '[data-toggle="lightbox"]', function(event) {
+  event.preventDefault();
+  $(this).ekkoLightbox({alwaysShowClose: false});
+});
+
+
+
+         */
+
     }
 
     /**
      * simple wrapper, throws errors if WP_DEBUG, otherwise prints an html comment
      * @param  string $err the error to maybe throw
      */
-    private function throwError($err)
+    public function throwError($err)
     {
-        if (WP_DEBUG) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
             throw new \Error($err);
         } else {
             return sprintf("\n\n\n<!-- %s -->\n\n", $err);
@@ -72,34 +90,53 @@ class VimeoEmbed
         );
     }
 
+    /**
+     * Wrap Vimeo's oEmbed code snippet in a stretchy div
+     */
+    public function wrap($video)
+    {
+        $vimeoData = $this->getVimeoData($video);
+        return $vimeoData;
+    }
+
+    /**
+     * Embed an HTML5 video tag
+     * @param  string $video A blob or vimeo ID
+     * @param  array  $args  An array of settings, [autoplay: true, loop: false]
+     */
+    public function embed($video, $args)
+    {
+        $vimeoData = $this->getVimeoData($video);
+        return $vimeoData;
+    }
 
     /**
      * Output a thumbnail linked srcset img tag for use with the ekko-lightbox bootstrap plugin
      * @param  number $vID Vimeo id
      * @return string     html code
      */
-    public function lightbox($vID, $force16x9 = true)
+    public function lightbox($video, $force16x9 = true)
     {
-        $data = $this->getVimeoData($vID);
+        $vimeoData = $this->getVimeoData($video);
 
         // /**
         //  * Handle total network failure
         //  */
-        // if ($data instanceof \Requests_Exception) {
-        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
+        // if ($vimeoData instanceof \Requests_Exception) {
+        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoData->getMessage()));
         // }
 
         // /**
         //  * Handle API errors (this happened)
         //  */
-        // if (property_exists($data, 'error')) {
-        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
+        // if (property_exists($vimeoData, 'error')) {
+        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoData->developer_message2) ?: $vimeoData->error));
         // }
 
-        return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $data->id) .
-        // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $data->id) .
-        // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $data->id) .
-        $this->getImgSrcSetTag($data) .
+        return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
+        // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $vimeoData->id) .
+        // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
+        $this->getImgSrcSetTag($vimeoData) .
         '<div class="play-button"></div>' .
         '</a>';
     }
@@ -118,21 +155,8 @@ class VimeoEmbed
         $atts = array_map('strtolower', $atts); // normalize attribute case
         $data = $this->getVimeoData($vID);
 
-        // /**
-        //  * Handle total network failure
-        //  */
-        // if ($data instanceof \Requests_Exception) {
-        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $data->getMessage()));
-        // }
-
-        // /**
-        //  * Handle API errors (this happened)
-        //  */
-        // if (property_exists($data, 'error')) {
-        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$data->developer_message2) ?: $data->error));
-        // }
-
         $loop = (in_array('loop', $atts)) ? 'loop' : '';
+        $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
 
         $output = sprintf(
             '<div class="embed-container" style="padding-bottom: %.5f%%;">',
@@ -157,7 +181,6 @@ class VimeoEmbed
      */
     public function getVimeoData($videoID)
     {
-
         if (!is_numeric($videoID) && preg_match('#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#', $videoID, $match)) {
             $videoID = $match[1];
         }
@@ -166,38 +189,29 @@ class VimeoEmbed
          * Handle bad input
          */
         if (!$videoID) {
-            return $this->throwError("VimeoEmbed Error: Missing Input");
+            return $this->throwError("VimeoEmbed Error: Unable to extract Vimeo ID from input");
         }
 
+        /**
+         * Set up WordPress Transient, delete transient if WP_DEBUG is true
+         */
         $transientID = "vimeo_$videoID";
-
-        // don't store anything if debugging
-        if (WP_DEBUG) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
             delete_transient($transientID);
         }
 
         $vimeoInfo = get_transient($transientID);
         if ($vimeoInfo === false) {
-            $headers = [
-                'Accept' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->token
-            ];
-            try {
-                $feed = \Requests::get("https://api.vimeo.com/videos/$videoID", $headers);
-                $vimeoInfo = json_decode($feed->body);
-                $vimeoInfo->id = $videoID;
-                $vimeoInfo->transient = $transientID;
-                set_transient($transientID, $vimeoInfo, 60 * 60);   // store transient for 1 hour
-            } catch (\Requests_Exception $e) {
-                $vimeoInfo = $e;
-            }
+            // $headers = [
+            //     'Accept' => 'application/json',
+            //     'Authorization' => 'Bearer ' . $this->token
+            // ];
 
-            /**
-             * Handle total network failure
-             */
-            if ($vimeoInfo instanceof \Requests_Exception) {
-                return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoInfo->getMessage()));
-            }
+            $vimeoInfo = $this->apiGet($videoID);
+            $vimeoInfo->id = $videoID;
+            $vimeoInfo->transient = $transientID;
+
+            set_transient($transientID, $vimeoInfo, 60 * 60);   // store transient for 1 hour
 
             /**
              * Handle API errors (this happened)
@@ -207,8 +221,29 @@ class VimeoEmbed
             if (property_exists($vimeoInfo, 'error')) {
                 return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoInfo->developer_message2) ?: $vimeoInfo->error));
             }
-
         }
         return $vimeoInfo;
+    }
+
+
+    /**
+     * encapsulating the API Request so we can mock the static method call
+     * @param  string $id The Video ID
+     * @return Object       returns decoded JSON blob from the API
+     */
+    public function apiGet($id)
+    {
+        $headers = [
+        'Accept' => 'application/json',
+        'Authorization' => 'Bearer ' . $this->token
+        ];
+        try {
+            $request = \Requests::get("https://api.vimeo.com/videos/$id", $headers);
+        } catch (\Requests_Exception $e) {
+            // Total network failure
+            $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoInfo->getMessage()));
+            $request = $e;
+        }
+        return json_decode($request->body);
     }
 }

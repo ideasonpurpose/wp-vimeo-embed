@@ -15,3 +15,22 @@ The following shortcodes will be supported:
  * `[vimeo 1234567 AutoPlay LOoP]` -- same as above (order and case don't matter)
  * `[vimeo 1234567 lightbox]` -- standard embed pops open an Ekko lightbox wrapper
 
+## Code
+
+There are three methods for injecting Vimeo embed codes in to a page:
+```
+$vimeo->wrap($vimeoID);
+$vimeo->embed($vimeoID);
+$vimeo->lightbox($vimeoID);
+```
+The library should be initialized with a Vimeo API token:
+
+use ideasonpurpose/VimeoEmbed;
+
+$vimeo = new VimeoEmbed('a1234a2bbdcc9d43250b2aefcff944ce');
+
+$vimeo->embed('1234567');
+
+Or, using the output directly from ACF Pro's oEmbed field:
+
+$vimeo->wrap
