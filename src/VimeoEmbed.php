@@ -23,12 +23,12 @@ class VimeoEmbed
     {
         $this->token = $auth_token;
         add_shortcode('vimeo', [$this, 'parseShortcode']);
-        add_action('wp_enqueue_scripts',  [$this, 'loadLightboxAssets']);
+        add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
     }
 
     public function loadLightboxAssets()
     {
-        wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css');
+        wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
         // wp_enqueue_script('ekko-lightbox', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.js', array('jquery'), '20120206', true);
         // wp_enqueue_script('ekko-lightbox', '/node_modules/ekko-lightbox/dist/ekko-lightbox.js', array('jquery'), '20120206', true);
 
