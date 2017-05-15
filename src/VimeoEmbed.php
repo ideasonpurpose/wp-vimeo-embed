@@ -110,7 +110,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                 <style>
                     #$id {
                         position: relative;
-                        overflow:hidden;
+                        overflow: hidden;
                         max-width: 100%%;
                         height: 0;
                         padding-bottom: %.5f%%;
@@ -200,7 +200,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $atts = array_map('strtolower', $atts); // normalize attribute case
 
         $config = ['loop' => in_array('loop', $atts), 'autoplay' => in_array('autoplay', $atts)];
-        d($atts, $config);
+        // d($atts, $config);
 
         if (count($atts) < 1) {
             return $this->wrap($vimeoId);
