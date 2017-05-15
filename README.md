@@ -2,6 +2,7 @@
 #### Version: 0.0.2
 
 [![Build Status](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed.svg?branch=master)](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed)
+[![Coverage Status](https://coveralls.io/repos/github/ideasonpurpose/wp-vimeo-embed/badge.svg?branch=master)](https://coveralls.io/github/ideasonpurpose/wp-vimeo-embed?branch=master)
 
 A collection of Vimeo embed tools and shortcodes for use in WordPress themes.
 
