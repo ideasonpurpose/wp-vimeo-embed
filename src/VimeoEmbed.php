@@ -105,7 +105,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $style = '';
 
         if ($includeStyle) {
-            $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html + microtime()), 0, 12);
+            $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html . microtime()), 0, 12);
             $style = sprintf("
                 <style>
                     #$id {
