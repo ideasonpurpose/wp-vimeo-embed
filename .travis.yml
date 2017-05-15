@@ -11,5 +11,9 @@ before_script:
   - npm install
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
- 
-script: vendor/bin/phpunit tests
+  - mkdir -p build/logs
+
+script: vendor/bin/phpunit tests --whitelist src --coverage-clover build/logs/clover.xml
+
+after_success:
+  - travis_retry php vendor/bin/coveralls -v

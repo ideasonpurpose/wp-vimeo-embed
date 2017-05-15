@@ -147,4 +147,23 @@ class VimeoEmbedTest extends TestCase
 
         $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
     }
+
+    public function testDivStart()
+    {
+        global $stub;
+        $fakeData = (object)['width' => 16, 'height' => 9, 'embed' => (object) ['html' => 'html body']];
+        $div = $stub->divStart($fakeData);
+        $this->assertRegExp('/<style>/', $div);
+        $this->assertRegExp('/<div id="vimeo-embed/', $div);
+    }
+
+    public function testDivStartNoStyle()
+    {
+        global $stub;
+        $fakeData = (object)['width' => 16, 'height' => 9, 'embed' => (object) ['html' => 'html body']];
+        $div = $stub->divStart($fakeData, false);
+        $this->assertNotRegExp('/<style>/', $div);
+        $this->assertNotRegExp('/<div id="vimeo-embed/', $div);
+        $this->assertRegExp('/<div class="embed-container/', $div);
+    }
 }

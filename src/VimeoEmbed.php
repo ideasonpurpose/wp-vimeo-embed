@@ -22,7 +22,7 @@ class VimeoEmbed
     public function __construct($auth_token)
     {
         $this->token = $auth_token;
-        add_shortcode('vimeo', [$this, 'vimeoEmbed']);
+        add_shortcode('vimeo', [$this, 'parseShortcode']);
         add_action('wp_enqueue_scripts',  [$this, 'loadLightboxAssets']);
     }
 
@@ -91,23 +91,85 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     }
 
     /**
+     * Returns a style tag and opening div tag
+     * The tags look something like this:
+     *     <style>
+     *         #vimeo-embed-409a91ec3 {position: relative; overflow:hidden; max-width: 100%; height: 0;}
+     *         #vimeo-embed-409a91ec3 iframe {position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+     *     </style>
+     *     <div id="vimeo-embed-409a91ec3" class="embed-container" style="padding-bottom: 56.25%;">
+     */
+    public function divStart($vimeoData, $includeStyle = true)
+    {
+        $id = '';
+        $style = '';
+
+        if ($includeStyle) {
+            $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html + microtime()), 0, 12);
+            $style = sprintf("
+                <style>
+                    #$id {
+                        position: relative;
+                        overflow:hidden;
+                        max-width: 100%%;
+                        height: 0;
+                        padding-bottom: %.5f%%;
+                    }
+                    #$id iframe,
+                    #vimeo-embed-$id video {
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        bottom: 0;
+                        left: 0;
+                    }
+                </style>
+            ", $vimeoData->height/$vimeoData->width * 100);
+            $id = "id=\"$id\" ";
+        }
+        $div = "
+            <div ${id}class=\"embed-container\">
+        ";
+        $style = preg_replace(['/\s+/', '/\s?([{<>}])\s?/'], [' ', '$1'], $style);
+        return $style . $div;
+    }
+
+    /**
      * Wrap Vimeo's oEmbed code snippet in a stretchy div
      */
     public function wrap($video)
     {
         $vimeoData = $this->getVimeoData($video);
-        return $vimeoData;
+        return $this->divStart($vimeoData) . $vimeoData->embed->html . '</div>';
     }
 
     /**
      * Embed an HTML5 video tag
+     *     note: Autoplay also sets muted to true so videos autoplay on mobile devices
      * @param  string $video A blob or vimeo ID
      * @param  array  $args  An array of settings, [autoplay: true, loop: false]
      */
-    public function embed($video, $args)
+    public function embed($video, $args = [])
     {
         $vimeoData = $this->getVimeoData($video);
-        return $vimeoData;
+        $defaults = [
+            'autoplay' => true,
+            'loop' => true
+        ];
+        $config = array_merge($defaults, $args);
+
+        $config['autoplay'] = ($config['autoplay']) ? 'autoplay muted' : '';
+        $config['loop'] = $config['loop'] ? 'loop' : '';
+
+        $output = sprintf(
+            '<video %s %s data-pictures="%s" data-files="%s"></video>',
+            $config['autoplay'],
+            $config['loop'],
+            htmlentities(json_encode($vimeoData->pictures->sizes), ENT_QUOTES, 'UTF-8'),
+            htmlentities(json_encode($vimeoData->files), ENT_QUOTES, 'UTF-8')
+        );
+
+        return $this->divStart($vimeoData) . $output . '</div>';
     }
 
     /**
@@ -119,20 +181,6 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     {
         $vimeoData = $this->getVimeoData($video);
 
-        // /**
-        //  * Handle total network failure
-        //  */
-        // if ($vimeoData instanceof \Requests_Exception) {
-        //     return $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoData->getMessage()));
-        // }
-
-        // /**
-        //  * Handle API errors (this happened)
-        //  */
-        // if (property_exists($vimeoData, 'error')) {
-        //     return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoData->developer_message2) ?: $vimeoData->error));
-        // }
-
         return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
         // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $vimeoData->id) .
         // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
@@ -141,6 +189,28 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         '</a>';
     }
 
+    public function parseShortcode($atts)
+    {
+        if (!$atts[0]) {
+            return;
+        }
+        $vimeoId = array_shift($atts);  // first item shoud be an ID.
+        $vimeoData = $this->getVimeoData($vimeoId);
+
+        $atts = array_map('strtolower', $atts); // normalize attribute case
+
+        $config = ['loop' => in_array('loop', $atts), 'autoplay' => in_array('autoplay', $atts)];
+        d($atts, $config);
+
+        if (count($atts) < 1) {
+            return $this->wrap($vimeoId);
+        }
+        return $this->embed($vimeoId, $config);
+
+        // $loop = (in_array('loop', $atts)) ? 'loop' : '';
+        // $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
+
+    }
     /**
     * Vimeo embed shortcode.
     * This is fluid and will scale with the page width.
@@ -154,7 +224,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $vID = array_shift($atts);
         $atts = array_map('strtolower', $atts); // normalize attribute case
         $data = $this->getVimeoData($vID);
-        d($data);
+        // d($data);
 
         $loop = (in_array('loop', $atts)) ? 'loop' : '';
         $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
@@ -194,25 +264,23 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         }
 
         /**
-         * Set up WordPress Transient, delete transient if WP_DEBUG is true
+         * Set up WordPress Transient
          */
         $transientID = "vimeo_$videoID";
-        if (defined('WP_DEBUG') && WP_DEBUG) {
-            delete_transient($transientID);
-        }
+        // if (defined('WP_DEBUG') && WP_DEBUG) {
+        //     delete_transient($transientID);
+        // }
 
         $vimeoInfo = get_transient($transientID);
         if ($vimeoInfo === false) {
-            // $headers = [
-            //     'Accept' => 'application/json',
-            //     'Authorization' => 'Bearer ' . $this->token
-            // ];
 
             $vimeoInfo = $this->apiGet($videoID);
             $vimeoInfo->id = $videoID;
             $vimeoInfo->transient = $transientID;
 
-            set_transient($transientID, $vimeoInfo, 60 * 60);   // store transient for 1 hour
+            $transientMinutes = (defined('WP_DEBUG') && WP_DEBUG) ? 2 : 60; // 2 minutes for debug, 60 for production
+
+            set_transient($transientID, $vimeoInfo, $transientMinutes * 60);
 
             /**
              * Handle API errors (this happened)
