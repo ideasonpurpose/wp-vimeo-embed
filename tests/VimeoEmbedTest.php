@@ -20,9 +20,6 @@ function delete_transient($id)
 // It should wrap Vimeo's embed code
 
 // It should Create a video tag embed
-// it should create a video tag embed with the loop attribute
-// it should create a video tag embed with the autoplay attribute
-// it should include muted and playsinline with the autoplay attribute
 // it should ignore case of loop and autoplay attributes
 //
 // it should embed a lightbox link
@@ -144,7 +141,7 @@ class VimeoEmbedTest extends TestCase
             ->getMock();
 
         $stub->method('apiGet')
-            ->willReturn((object)['name' => 'vimeo', 'error' => 'API Error' ]);
+            ->willReturn((object)['pictures' => 'vimeo', 'error' => 'API Error' ]);
 
         $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
     }
@@ -157,10 +154,21 @@ class VimeoEmbedTest extends TestCase
      */
     public function testHTML5Attributes()
     {
-        global $stub;
+        $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
+            ->disableOriginalConstructor()
+            ->setMethods(['getVimeoData', 'divStart'])
+            ->getMock();
+
+        $stub->method('getVimeoData')
+            ->willReturn((object)['files' => 'files array', 'pictures' => (object) ['sizes' => 'pictures array'] ]);
+
         $this->assertRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => true]));
         $this->assertNotRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => false]));
+        $this->assertRegExp('/muted/', $stub->embed(1234, ['autoplay' => true]));
+        $this->assertRegExp('/playsinline/', $stub->embed(1234, ['autoplay' => true]));
+
         $this->assertRegExp('/loop/', $stub->embed(1234, ['loop' => true]));
+        $this->assertNotRegExp('/loop/', $stub->embed(1234, ['loop' => false]));
     }
 
     public function testDivStart()

@@ -158,7 +158,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         ];
         $config = array_merge($defaults, $args);
 
-        $config['autoplay'] = ($config['autoplay']) ? 'autoplay muted' : '';
+        $config['autoplay'] = ($config['autoplay']) ? 'autoplay muted playsinline' : '';
         $config['loop'] = $config['loop'] ? 'loop' : '';
 
         $output = sprintf(
