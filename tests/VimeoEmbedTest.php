@@ -22,6 +22,7 @@ function delete_transient($id)
 // It should Create a video tag embed
 // it should create a video tag embed with the loop attribute
 // it should create a video tag embed with the autoplay attribute
+// it should include muted and playsinline with the autoplay attribute
 // it should ignore case of loop and autoplay attributes
 //
 // it should embed a lightbox link
@@ -146,6 +147,20 @@ class VimeoEmbedTest extends TestCase
             ->willReturn((object)['name' => 'vimeo', 'error' => 'API Error' ]);
 
         $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
+    }
+
+
+    /**
+     * it should create a video tag embed with the loop attribute
+     * it should create a video tag embed with the autoplay attribute
+     * it should include muted and playsinline with the autoplay attribute
+     */
+    public function testHTML5Attributes()
+    {
+        global $stub;
+        $this->assertRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => true]));
+        $this->assertNotRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => false]));
+        $this->assertRegExp('/loop/', $stub->embed(1234, ['loop' => true]));
     }
 
     public function testDivStart()
