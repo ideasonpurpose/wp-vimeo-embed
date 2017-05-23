@@ -19,18 +19,20 @@ The following shortcodes will be supported:
 ## Code
 
 There are three methods for injecting Vimeo embed codes in to a page:
-```
-$vimeo->wrap($vimeoID);
-$vimeo->embed($vimeoID);
-$vimeo->lightbox($vimeoID);
+```php
+$vimeo->wrap($vimeoID);       // Wrap Vimeo's embed code in a responsive wrapper
+$vimeo->embed($vimeoID, [$arg1]);      // Inject an HTML5 video tag
+$vimeo->lightbox($vimeoID);   // Inject a image link which opens a video lightbox
 ```
 The library should be initialized with a Vimeo API token:
 
-    use ideasonpurpose/VimeoEmbed;
+```php
+use ideasonpurpose/VimeoEmbed;
 
 $vimeo = new VimeoEmbed('a1234a2bbdcc9d43250b2aefcff944ce');
 
-    $vimeo->embed('1234567');
+$vimeo->embed('1234567');
+```
 
 Or, using the output directly from ACF Pro's oEmbed field:
 
