@@ -120,6 +120,7 @@ class VimeoEmbedTest extends TestCase
         global $stub;
         $this->assertRegExp('/<!--/', $stub->getVimeoData(null));
         $this->assertRegExp('/<!--/', $stub->getVimeoData(''));
+        // TODO: Test for a malformed data set with a missing Vimeo->Pictures->sizes array
     }
 
     /**

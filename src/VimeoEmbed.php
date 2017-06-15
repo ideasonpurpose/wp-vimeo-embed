@@ -103,17 +103,18 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     {
         $id = '';
         $style = '';
+        $padding = (is_numeric($vimeoData->width) && $vimeoData->width > 0) ? round($vimeoData->height/$vimeoData->width * 100, 5) : 0;
 
         if ($includeStyle) {
             $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html . microtime()), 0, 12);
-            $style = sprintf("
+            $style = "
                 <style>
                     #$id {
                         position: relative;
                         overflow: hidden;
                         max-width: 100%%;
                         height: 0;
-                        padding-bottom: %.5f%%;
+                        padding-bottom: $padding%;
                     }
                     #$id iframe,
                     #vimeo-embed-$id video {
@@ -124,7 +125,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                         left: 0;
                     }
                 </style>
-            ", $vimeoData->height/$vimeoData->width * 100);
+            ";
             $id = "id=\"$id\" ";
         }
         $div = "
@@ -152,6 +153,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     public function embed($video, $args = [])
     {
         $vimeoData = $this->getVimeoData($video);
+        d($vimeoData);
         $defaults = [
             'autoplay' => true,
             'loop' => true
@@ -290,6 +292,13 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
             if (property_exists($vimeoInfo, 'error')) {
                 return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoInfo->developer_message2) ?: $vimeoInfo->error));
             }
+            /**
+             * Handle missing data
+             */
+            if (!property_exists($vimeoInfo->pictures, 'sizes')) {
+                return $this->throwError("VimeoEmbed API Error: Missing Files Array");
+            }
+
         }
         return $vimeoInfo;
     }
