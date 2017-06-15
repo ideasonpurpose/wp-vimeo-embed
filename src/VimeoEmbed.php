@@ -153,7 +153,6 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     public function embed($video, $args = [])
     {
         $vimeoData = $this->getVimeoData($video);
-        d($vimeoData);
         $defaults = [
             'autoplay' => true,
             'loop' => true
