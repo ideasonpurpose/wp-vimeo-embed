@@ -13,7 +13,7 @@ The following shortcodes will be supported:
  * `[vimeo 1234567 loop]` -- video tag embed, loops
  * `[vimeo 1234567 autoplay]` -- video tag embed, autoplay
  * `[vimeo 1234567 loop autoplay]` -- video tag embed, loops and autoplays
- * `[vimeo 1234567 AutoPlay LOoP]` -- same as above (order and case don't matter)
+ * `[vimeo 1234567 autoPLAY LoOp]` -- same as above (order and case don't matter)
  * `[vimeo 1234567 lightbox]` -- standard embed pops open an Ekko lightbox wrapper
 
 ## Code
@@ -64,3 +64,15 @@ use ideasonpurpose/VimeoEmbed;
 
 $vimeo = new VimeoEmbed('1234567890abcdef0000000000000000');
 ```
+
+
+## Development
+
+Tests run with [PHPUnit][]. All tests have been wrapped in npm commands. To run test suite use `npm test`.To watch all files and automatically re-run the test suite on changes use `npm run watch`.
+
+
+
+
+
+
+[phpunit]: https://phpunit.de/

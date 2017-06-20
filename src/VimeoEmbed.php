@@ -10,7 +10,7 @@ namespace ideasonpurpose;
  * [vimeo 1234567 loop] -- video tag embed, loops
  * [vimeo 1234567 autoplay] -- video tag embed, autoplay
  * [vimeo 1234567 loop autoplay] -- video tag embed, loops and autoplays
- * [vimeo 1234567 AutoPlay LOoP] -- same as above (order and case don't matter)
+ * [vimeo 1234567 autoPLAY LoOp] -- same as above (order and case don't matter)
  * [vimeo 1234567 lightbox] -- standard embed plays in lightbox
  */
 class VimeoEmbed
@@ -294,7 +294,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
             /**
              * Handle missing data
              */
-            if (!property_exists($vimeoInfo->pictures, 'sizes')) {
+            if (property_exists($vimeoInfo, 'pictures') && !property_exists($vimeoInfo->pictures, 'sizes')) {
                 return $this->throwError("VimeoEmbed API Error: Missing Files Array");
             }
 
