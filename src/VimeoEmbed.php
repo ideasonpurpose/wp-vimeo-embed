@@ -22,33 +22,22 @@ class VimeoEmbed
     public function __construct($auth_token)
     {
         $this->token = $auth_token;
+        $this->package_json = json_decode(file_get_contents(__DIR__ . '/../package.json'));
         add_shortcode('vimeo', [$this, 'parseShortcode']);
         add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
     }
 
     public function loadLightboxAssets()
     {
-        wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
-        // wp_enqueue_script('ekko-lightbox', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.js', array('jquery'), '20120206', true);
-        // wp_enqueue_script('ekko-lightbox', '/node_modules/ekko-lightbox/dist/ekko-lightbox.js', array('jquery'), '20120206', true);
+      // d($this->package_json->version, __FILE__, plugins_url(), plugins_url('/assets/js/vimeo-lightbox.js', __FILE__));
+      // d($this->package_json->version, dirname(__DIR__), plugins_url(), plugins_url('/assets/js/vimeo-lightbox.js', dirname(__DIR__)));
+      // d(get_stylesheet_directory(), get_stylesheet_directory_uri(), __FILE__);
+      // d(str_replace(get_stylesheet_directory(), get_stylesheet_directory_uri(), __DIR__));
 
-        /*
-
-        This code snippet should be injected to enable
-const $ = window.jQuery;
-
-
-require('../../vendor/ideasonpurpose/wp-vimeo-embed/src/js/ekko-lightbox');
-
-
-$(document).on('click', '[data-toggle="lightbox"]', function(event) {
-  event.preventDefault();
-  $(this).ekkoLightbox({alwaysShowClose: false});
-});
-
-
-
-         */
+        wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.2.0/ekko-lightbox.min.css', [], null);
+        wp_enqueue_script('ekko-lightbox', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.2.0/ekko-lightbox.min.js', ['jquery'], null, false);
+        wp_enqueue_script('jq3', 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js', [], null, true);
+        wp_enqueue_script('ideasonpurpose-lightbox-handler', str_replace(get_stylesheet_directory(), get_stylesheet_directory_uri(), dirname(__DIR__)) . '/assets/js/vimeo-lightbox.js', ['jq3', 'ekko-lightbox'], $this->package_json->version, true);
 
     }
 
