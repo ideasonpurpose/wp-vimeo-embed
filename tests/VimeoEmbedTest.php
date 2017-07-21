@@ -3,19 +3,8 @@
 namespace ideasonpurpose;
 
 use PHPUnit\Framework\TestCase;
-
-require_once(realpath(__DIR__ . '/../src/VimeoEmbed.php'));
-require_once(realpath(__DIR__ . '/../vendor/rmccue/requests/library/Requests.php'));
-
-
-function set_transient($id, $time)
-{
-    return true;
-}
-function delete_transient($id)
-{
-    return true;
-}
+use Brain\Monkey\Functions;
+use Requests;
 
 // It should wrap Vimeo's embed code
 
@@ -32,18 +21,7 @@ function delete_transient($id)
 
 class VimeoEmbedTest extends TestCase
 {
-    /**
-     * Make sure tests are working
-     */
-    public function test()
-    {
-        $this->assertTrue(true);
-    }
-
-    /**
-     * @before
-     */
-    public function setupStub()
+    public function setUp()
     {
         global $stub;
         $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
@@ -53,6 +31,20 @@ class VimeoEmbedTest extends TestCase
 
         $stub->method('apiGet')
             ->willReturn((object)['name' => 'vimeo' ]);
+
+        Functions\when('set_transient')->justReturn(true);
+        Functions\when('get_transient')->justReturn(false);
+        Functions\when('delete_transient')->justReturn(true);
+        parent::setUp();
+    }
+
+    /**
+     * Make sure tests are working
+     */
+    public function test()
+    {
+        $this->assertTrue(true);
+        $this->assertFalse(false);
     }
 
     /**
@@ -64,10 +56,6 @@ class VimeoEmbedTest extends TestCase
     public function testGetVimeoIdFromVimeoID()
     {
         global $stub;
-        function get_transient($id)
-        {
-            return false;
-        }
 
         $this->assertEquals('123456', $stub->getVimeoData(123456)->id);
         $this->assertEquals('123456', $stub->getVimeoData('123456')->id);
@@ -83,10 +71,6 @@ class VimeoEmbedTest extends TestCase
     public function testGetVimeoIdFromEmbedCode()
     {
         global $stub;
-        function get_transient($id)
-        {
-            return false;
-        }
         $oEmbedBlob = '<iframe src="https://player.vimeo.com/video/216711407" width="519" height="390" frameborder="0" title="Navigators 2016 Digital Annual Report" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
         $this->assertEquals('216711407', $stub->getVimeoData($oEmbedBlob)->id);
 
@@ -131,10 +115,6 @@ class VimeoEmbedTest extends TestCase
      */
     public function testVimeoAPIError()
     {
-        function get_transient($id)
-        {
-            return false;
-        }
 
         $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
             ->disableOriginalConstructor()
