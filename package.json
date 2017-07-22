@@ -1,6 +1,6 @@
 {
   "name": "wp-vimeo-embed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A collection of Vimeo embed tools and shortcodes for use in WordPress themes.",
   "main": "index.js",
   "directories": {
