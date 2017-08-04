@@ -70,7 +70,18 @@ $vimeo = new VimeoEmbed('1234567890abcdef0000000000000000');
 
 Tests run with [PHPUnit][]. All tests have been wrapped in npm commands. To run test suite use `npm test`.To watch all files and automatically re-run the test suite on changes use `npm run watch`.
 
+The library is developed under PHP 7, TravisCI tests against earlier versions. 
 
+For Mac setup, use Homebrew to install the following:
+```
+$ brew tap homebrew/homebrew-php
+$ brew install php70 composer phpunit node
+```
+Install dependencies from inside the working directory:
+```
+$ npm install
+$ composer install
+```
 
 
 

@@ -30,7 +30,10 @@ class VimeoEmbedTest extends TestCase
             ->getMock();
 
         $stub->method('apiGet')
-            ->willReturn((object)['name' => 'vimeo' ]);
+            ->willReturn((object)[
+                'name' => 'vimeo',
+                'embed' => (object) ['html' => 'EMBED_CODE']
+             ]);
 
         Functions\when('set_transient')->justReturn(true);
         Functions\when('get_transient')->justReturn(false);
@@ -127,11 +130,35 @@ class VimeoEmbedTest extends TestCase
         $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
     }
 
+    /**
+     * It should wrap Vimeo's embed code
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testWrapEmbedCode()
+    {
+        // global $stub;
+        $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
+            ->disableOriginalConstructor()
+            ->setMethods(['apiGet'])
+            ->getMock();
+
+        $stub->method('apiGet')
+            ->willReturn((object)[
+                'embed' => (object) ['html' => 'EMBED_CODE']
+             ]);
+
+        $actual = $stub->wrap(123);
+        $this->assertEquals('5', $actual);
+
+    }
 
     /**
      * it should create a video tag embed with the loop attribute
      * it should create a video tag embed with the autoplay attribute
      * it should include muted and playsinline with the autoplay attribute
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
      */
     public function testHTML5Attributes()
     {
@@ -157,6 +184,7 @@ class VimeoEmbedTest extends TestCase
         global $stub;
         $fakeData = (object)['width' => 16, 'height' => 9, 'embed' => (object) ['html' => 'html body']];
         $div = $stub->divStart($fakeData);
+        echo $div;
         $this->assertRegExp('/<style>/', $div);
         $this->assertRegExp('/<div id="vimeo-embed/', $div);
     }
