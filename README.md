@@ -1,6 +1,6 @@
 # wp-vimeo-embed
 
-#### Version: 0.1.1
+#### Version: 0.2.0
 
 [![Build Status](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed.svg?branch=master)](https://travis-ci.org/ideasonpurpose/wp-vimeo-embed)
 [![Coverage Status](https://coveralls.io/repos/github/ideasonpurpose/wp-vimeo-embed/badge.svg?branch=master)](https://coveralls.io/github/ideasonpurpose/wp-vimeo-embed?branch=master)
