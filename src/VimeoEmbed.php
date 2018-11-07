@@ -22,27 +22,39 @@ class VimeoEmbed
     public function __construct($auth_token)
     {
         $this->token = $auth_token;
+        $this->version = json_decode(
+            file_get_contents("../package.json")
+        )->version;
         add_shortcode('vimeo', [$this, 'parseShortcode']);
         add_action('wp_enqueue_scripts', [$this, 'fitScript']);
         add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
-
     }
 
     public function fitScript()
     {
-        echo '<!--  LOCATION: ' . get_template_directory_uri() . ' -->';
-        echo '<!--  FILE: ' . __FILE__ . ' -->';
-        echo '<!--  get_stylesheet_directory_uri: ' . get_stylesheet_directory_uri() . ' -->';
-        echo strpos(__FILE__, get_stylesheet_directory());
-        d(\Wikimedia\RelPath::getRelativePath(__FILE__, get_stylesheet_directory()));
 
-        wp_enqueue_script(__CLASS__, get_stylesheet_directory_uri() . '/vendor/ideasonpurpose/wp-vimeo-embed/src/js/wp-vimeo-embed.js');
+        // get relative path to this vendor subdirectory
+        $relVendorPath = trim(
+            str_replace(get_stylesheet_directory(), '', __DIR__),
+            '/'
+        );
+        $jsPath = implode('/', [
+            get_stylesheet_directory_uri(),
+            $relVendorPath,
+            '/js/init.js'
+        ]);
+
+        wp_enqueue_script(__CLASS__, $jsPath, ['jquery'], $this->version, true);
         // wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
-
     }
     public function loadLightboxAssets()
     {
-        wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
+        wp_enqueue_style(
+            'ekko-lightbox-styles',
+            'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css',
+            [],
+            null
+        );
         // wp_enqueue_script('ekko-lightbox', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.js', array('jquery'), '20120206', true);
         // wp_enqueue_script('ekko-lightbox', '/node_modules/ekko-lightbox/dist/ekko-lightbox.js', array('jquery'), '20120206', true);
 
@@ -63,7 +75,6 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
 
 
          */
-
     }
 
     /**
@@ -87,9 +98,13 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
      */
     private function getImgSrcSetTag($vimeoInfo)
     {
-        $maxWidth = array_reduce($vimeoInfo->pictures->sizes, function ($prev, $curr) {
-            return max($prev, $curr->width);
-        }, 0);
+        $maxWidth = array_reduce(
+            $vimeoInfo->pictures->sizes,
+            function ($prev, $curr) {
+                return max($prev, $curr->width);
+            },
+            0
+        );
         $srcset = array_map(function ($i) {
             return sprintf("%s %dw", $i->link, $i->width);
         }, $vimeoInfo->pictures->sizes);
@@ -117,26 +132,33 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     {
         $id = '';
         $style = '';
-        $padding = (is_numeric($vimeoData->width) && $vimeoData->width > 0) ? round($vimeoData->height/$vimeoData->width * 100, 5) : 0;
+        $padding =
+            is_numeric($vimeoData->width) && $vimeoData->width > 0
+                ? round(($vimeoData->height / $vimeoData->width) * 100, 5)
+                : 0;
 
         if ($includeStyle) {
-            $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html . microtime()), 0, 12);
+            $id =
+                'vimeo-embed-' .
+                substr(md5($vimeoData->embed->html . microtime()), 0, 12);
             $style = "
                 <style>
                     #$id {
                         position: relative;
                         overflow: hidden;
-                        max-width: 100%;
-                        height: 0;
                         padding-bottom: $padding%;
                     }
                     #$id iframe,
-                    #vimeo-embed-$id video {
+                    #$id video {
                         position: absolute;
                         top: 0;
                         right: 0;
                         bottom: 0;
                         left: 0;
+                        min-width: 100%;
+                        min-height: 100%;
+                        height: auto;
+                        width: auto;
                     }
                 </style>
             ";
@@ -145,7 +167,11 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $div = "
             <div ${id}class=\"embed-container\">
         ";
-        $style = preg_replace(['/\s+/', '/\s?([{<>}])\s?/'], [' ', '$1'], $style);
+        $style = preg_replace(
+            ['/\s+/', '/\s?([{<>}])\s?/'],
+            [' ', '$1'],
+            $style
+        );
         return $style . $div;
     }
 
@@ -173,14 +199,20 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         ];
         $config = array_merge($defaults, $args);
 
-        $config['autoplay'] = ($config['autoplay']) ? 'autoplay muted playsinline' : '';
+        $config['autoplay'] = $config['autoplay']
+            ? 'autoplay muted playsinline'
+            : '';
         $config['loop'] = $config['loop'] ? 'loop' : '';
 
         $output = sprintf(
             '<video %s %s data-pictures="%s" data-files="%s"></video>',
             $config['autoplay'],
             $config['loop'],
-            htmlentities(json_encode($vimeoData->pictures->sizes), ENT_QUOTES, 'UTF-8'),
+            htmlentities(
+                json_encode($vimeoData->pictures->sizes),
+                ENT_QUOTES,
+                'UTF-8'
+            ),
             htmlentities(json_encode($vimeoData->files), ENT_QUOTES, 'UTF-8')
         );
 
@@ -196,12 +228,15 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     {
         $vimeoData = $this->getVimeoData($video);
 
-        return sprintf('<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
-        // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $vimeoData->id) .
-        // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
-        $this->getImgSrcSetTag($vimeoData) .
-        '<div class="play-button"></div>' .
-        '</a>';
+        return // return sprintf('<a href="/wp-content/uploads/2017/01/MCB_1729-e1485526480348.jpg" data-toggle="lightbox" data-width="sm">', $vimeoData->id) .
+            // return sprintf('<a href="http://vimeo.com/%1$s" data-remote="https://www.youtube.com/watch?v=ussCHoQttyQ" data-toggle="lightbox" data-width="1280" >', $vimeoData->id) .
+            sprintf(
+                '<a href="https://vimeo.com/%1$s" data-remote="https://player.vimeo.com/video/%1$s" data-toggle="lightbox" data-width="1280" >',
+                $vimeoData->id
+            ) .
+                $this->getImgSrcSetTag($vimeoData) .
+                '<div class="play-button"></div>' .
+                '</a>';
     }
 
     public function parseShortcode($atts)
@@ -209,12 +244,15 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         if (!$atts[0]) {
             return;
         }
-        $vimeoId = array_shift($atts);  // first item shoud be an ID.
+        $vimeoId = array_shift($atts); // first item shoud be an ID.
         $vimeoData = $this->getVimeoData($vimeoId);
 
         $atts = array_map('strtolower', $atts); // normalize attribute case
 
-        $config = ['loop' => in_array('loop', $atts), 'autoplay' => in_array('autoplay', $atts)];
+        $config = [
+            'loop' => in_array('loop', $atts),
+            'autoplay' => in_array('autoplay', $atts)
+        ];
         // d($atts, $config);
 
         if (count($atts) < 1) {
@@ -224,13 +262,12 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
 
         // $loop = (in_array('loop', $atts)) ? 'loop' : '';
         // $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
-
     }
     /**
-    * Vimeo embed shortcode.
-    * This is fluid and will scale with the page width.
-    * Overrides the Vimeo embed from JetPack.
-    */
+     * Vimeo embed shortcode.
+     * This is fluid and will scale with the page width.
+     * Overrides the Vimeo embed from JetPack.
+     */
     public function vimeoEmbed($atts)
     {
         if (!$atts[0]) {
@@ -241,17 +278,21 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $data = $this->getVimeoData($vID);
         // d($data);
 
-        $loop = (in_array('loop', $atts)) ? 'loop' : '';
-        $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
+        $loop = in_array('loop', $atts) ? 'loop' : '';
+        $autoplay = in_array('autoplay', $atts) ? 'autoplay' : '';
 
         $output = sprintf(
             '<div class="embed-container" style="padding-bottom: %.5f%%;">',
-            $data->height/$data->width * 100
+            ($data->height / $data->width) * 100
         );
         $output .= sprintf(
             '<video autoplay muted playsinline id="%s" data-pictures="%s" data-files="%s" %s></video>',
             $data->id,
-            htmlentities(json_encode($data->pictures->sizes), ENT_QUOTES, 'UTF-8'),
+            htmlentities(
+                json_encode($data->pictures->sizes),
+                ENT_QUOTES,
+                'UTF-8'
+            ),
             htmlentities(json_encode($data->files), ENT_QUOTES, 'UTF-8'),
             $loop
         );
@@ -267,7 +308,14 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
      */
     public function getVimeoData($videoID)
     {
-        if (!is_numeric($videoID) && preg_match('#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#', $videoID, $match)) {
+        if (
+            !is_numeric($videoID) &&
+            preg_match(
+                '#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#',
+                $videoID,
+                $match
+            )
+        ) {
             $videoID = $match[1];
         }
 
@@ -275,7 +323,9 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
          * Handle bad input
          */
         if (!$videoID) {
-            return $this->throwError("VimeoEmbed Error: Unable to extract Vimeo ID from input");
+            return $this->throwError(
+                "VimeoEmbed Error: Unable to extract Vimeo ID from input"
+            );
         }
 
         /**
@@ -288,12 +338,11 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
 
         $vimeoInfo = get_transient($transientID);
         if ($vimeoInfo === false) {
-
             $vimeoInfo = $this->apiGet($videoID);
             $vimeoInfo->id = $videoID;
             $vimeoInfo->transient = $transientID;
 
-            $transientMinutes = (defined('WP_DEBUG') && WP_DEBUG) ? 2 : 60; // 2 minutes for debug, 60 for production
+            $transientMinutes = defined('WP_DEBUG') && WP_DEBUG ? 2 : 60; // 2 minutes for debug, 60 for production
 
             set_transient($transientID, $vimeoInfo, $transientMinutes * 60);
 
@@ -303,19 +352,27 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
              * $data = unserialize('O:8:"stdClass":5:{s:5:"error";s:21:"You have been banned.";s:4:"link";N;s:17:"developer_message";s:65:"You have been banned. Contact vimeo support for more information.";s:10:"error_code";i:3500;s:2:"id";s:15:"vimeo_180818116";}');
              */
             if (property_exists($vimeoInfo, 'error')) {
-                return $this->throwError(sprintf("VimeoEmbed API Error: %s", (@$vimeoInfo->developer_message2) ?: $vimeoInfo->error));
+                return $this->throwError(
+                    sprintf(
+                        "VimeoEmbed API Error: %s",
+                        @$vimeoInfo->developer_message2 ?: $vimeoInfo->error
+                    )
+                );
             }
             /**
              * Handle missing data
              */
-            if (property_exists($vimeoInfo, 'pictures') && !property_exists($vimeoInfo->pictures, 'sizes')) {
-                return $this->throwError("VimeoEmbed API Error: Missing Files Array");
+            if (
+                property_exists($vimeoInfo, 'pictures') &&
+                !property_exists($vimeoInfo->pictures, 'sizes')
+            ) {
+                return $this->throwError(
+                    "VimeoEmbed API Error: Missing Files Array"
+                );
             }
-
         }
         return $vimeoInfo;
     }
-
 
     /**
      * encapsulating the API Request so we can mock the static method call
@@ -325,14 +382,22 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     public function apiGet($id)
     {
         $headers = [
-        'Accept' => 'application/json',
-        'Authorization' => 'Bearer ' . $this->token
+            'Accept' => 'application/json',
+            'Authorization' => 'Bearer ' . $this->token
         ];
         try {
-            $request = \Requests::get("https://api.vimeo.com/videos/$id", $headers);
+            $request = \Requests::get(
+                "https://api.vimeo.com/videos/$id",
+                $headers
+            );
         } catch (\Requests_Exception $e) {
             // Total network failure
-            $this->throwError(sprintf("VimeoEmbed Network Error: %s", $vimeoInfo->getMessage()));
+            $this->throwError(
+                sprintf(
+                    "VimeoEmbed Network Error: %s",
+                    $vimeoInfo->getMessage()
+                )
+            );
             $request = $e;
         }
         return json_decode($request->body);
