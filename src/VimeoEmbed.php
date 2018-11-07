@@ -23,9 +23,23 @@ class VimeoEmbed
     {
         $this->token = $auth_token;
         add_shortcode('vimeo', [$this, 'parseShortcode']);
+        add_action('wp_enqueue_scripts', [$this, 'fitScript']);
         add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
+
     }
 
+    public function fitScript()
+    {
+        echo '<!--  LOCATION: ' . get_template_directory_uri() . ' -->';
+        echo '<!--  FILE: ' . __FILE__ . ' -->';
+        echo '<!--  get_stylesheet_directory_uri: ' . get_stylesheet_directory_uri() . ' -->';
+        echo strpos(__FILE__, get_stylesheet_directory());
+        d(\Wikimedia\RelPath::getRelativePath(__FILE__, get_stylesheet_directory()));
+
+        wp_enqueue_script(__CLASS__, get_stylesheet_directory_uri() . '/vendor/ideasonpurpose/wp-vimeo-embed/src/js/wp-vimeo-embed.js');
+        // wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
+
+    }
     public function loadLightboxAssets()
     {
         wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
@@ -112,7 +126,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                     #$id {
                         position: relative;
                         overflow: hidden;
-                        max-width: 100%%;
+                        max-width: 100%;
                         height: 0;
                         padding-bottom: $padding%;
                     }

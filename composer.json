@@ -29,5 +29,8 @@
     "php-coveralls/php-coveralls": "^2.1",
     "phpunit/phpunit": "^6",
     "rmccue/requests": "^1.7"
+  },
+  "require": {
+    "wikimedia/relpath": "^2.1"
   }
 }
