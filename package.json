@@ -2,36 +2,36 @@
   "name": "wp-vimeo-embed",
   "version": "0.1.1",
   "description": "A collection of Vimeo embed tools and shortcodes for use in WordPress themes.",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "phpunit --colors=always tests",
-    "version": "version-everything && git add -u",
-    "watch": "watch -f '**/*.php' -r 'phpunit --colors=always tests'"
+  "keywords": [
+    "ideasonpurpose",
+    "video",
+    "vimeo",
+    "wordpress"
+  ],
+  "homepage": "https://github.com/ideasonpurpose/wp-vimeo-embed#readme",
+  "bugs": {
+    "url": "https://github.com/ideasonpurpose/wp-vimeo-embed/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ideasonpurpose/wp-vimeo-embed.git"
   },
-  "keywords": [
-    "vimeo",
-    "wordpress",
-    "video",
-    "ideasonpurpose"
-  ],
-  "author": "Joe Maller <joe@joemaller.com> (http://www.joemaller.com)",
   "license": "MIT",
+  "author": "Joe Maller <joe@joemaller.com> (http://www.joemaller.com)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "./vendor/bin/phpunit --colors=always tests",
+    "version": "version-everything && git add -u",
+    "watch": "watch -f '**/*.php' -r './vendor/bin/phpunit --colors=always tests'"
+  },
+  "devDependencies": {
+    "cli-watch": "^1.0.7",
+    "version-everything": "^0.2.2"
+  },
   "version_files": [
     "README.md"
-  ],
-  "bugs": {
-    "url": "https://github.com/ideasonpurpose/wp-vimeo-embed/issues"
-  },
-  "homepage": "https://github.com/ideasonpurpose/wp-vimeo-embed#readme",
-  "devDependencies": {
-    "cli-watch": "^1.0.6",
-    "version-everything": "^0.1.2"
-  }
+  ]
 }

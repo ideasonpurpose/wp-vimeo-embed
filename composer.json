@@ -1,24 +1,33 @@
 {
-    "name": "ideasonpurpose/wp-vimeo-embed",
-    "description": "Vimeo embedding functions and shortcodes",
-    "license": "ISC",
-    "keywords": ["wordpress", "vimeo", "video", "Ideas On Purpose"],
-    "authors": [
-        {
-            "name": "Joe Maller",
-            "email": "joe@ideasonpurpose.com"
-        }
-    ],
-    "require": {},
-    "require-dev": {
-        "phpunit/phpunit": "^5.7",
-        "rmccue/requests": "^1.7",
-        "satooshi/php-coveralls": "dev-master",
-        "brain/monkey": "^2.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "ideasonpurpose\\": "src"
-        }
+  "name": "ideasonpurpose/wp-vimeo-embed",
+  "description": "Vimeo embedding functions and shortcodes",
+  "license": "ISC",
+  "keywords": [
+    "wordpress",
+    "vimeo",
+    "video",
+    "Ideas On Purpose",
+    "ideasonpurpose"
+  ],
+  "author": "Ideas On Purpose (https://www.ideasonpurpose.com/)",
+  "contributors": [
+    "Joe Maller <joe@ideasonpurpose.com>"
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "ideasonpurpose\\": "src"
     }
+  },
+  "require-dev": {
+    "brain/monkey": "^2.2",
+    "php-coveralls/php-coveralls": "^2.1",
+    "phpunit/phpunit": "^7",
+    "rmccue/requests": "^1.7"
+  }
 }
