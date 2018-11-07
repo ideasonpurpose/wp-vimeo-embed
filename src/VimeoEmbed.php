@@ -23,7 +23,7 @@ class VimeoEmbed
     {
         $this->token = $auth_token;
         $this->version = json_decode(
-            file_get_contents("../package.json")
+            file_get_contents(dirname(__DIR__) . '/package.json')
         )->version;
         add_shortcode('vimeo', [$this, 'parseShortcode']);
         add_action('wp_enqueue_scripts', [$this, 'fitScript']);

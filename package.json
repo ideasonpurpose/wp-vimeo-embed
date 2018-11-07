@@ -32,6 +32,7 @@
     "version-everything": "^0.2.2"
   },
   "version_files": [
-    "README.md"
+    "README.md",
+    "src/VimeoEmbed.php"
   ]
 }
