@@ -3,7 +3,7 @@
 namespace ideasonpurpose;
 
 /**
- * version: 0.0.0
+ * version: 0.2.1
  *
  * Shortcode takes arguments:
  * [vimeo 1234567]   -- straight embed, stretches to 100% width
