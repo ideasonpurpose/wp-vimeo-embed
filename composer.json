@@ -27,10 +27,10 @@
   "require-dev": {
     "brain/monkey": "^2.2",
     "php-coveralls/php-coveralls": "^2.1",
-    "phpunit/phpunit": "^6",
-    "rmccue/requests": "^1.7"
+    "phpunit/phpunit": "^8"
   },
   "require": {
+    "guzzlehttp/guzzle": "^6.3",
     "wikimedia/relpath": "^2.1"
   }
 }

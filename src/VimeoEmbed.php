@@ -2,6 +2,9 @@
 
 namespace ideasonpurpose;
 
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
+
 /**
  * version: 0.2.1
  *
@@ -21,6 +24,7 @@ class VimeoEmbed
      */
     public function __construct($auth_token)
     {
+        $this->client = new \GuzzleHttp\Client();
         $this->token = $auth_token;
         $this->version = json_decode(
             file_get_contents(dirname(__DIR__) . '/package.json')
@@ -32,7 +36,6 @@ class VimeoEmbed
 
     public function fitScript()
     {
-
         // get relative path to this vendor subdirectory
         $relVendorPath = trim(
             str_replace(get_stylesheet_directory(), '', __DIR__),
@@ -381,25 +384,30 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
      */
     public function apiGet($id)
     {
-        $headers = [
-            'Accept' => 'application/json',
-            'Authorization' => 'Bearer ' . $this->token
-        ];
+        $result = false;
         try {
-            $request = \Requests::get(
+            $request = $this->client->request(
+                'GET',
                 "https://api.vimeo.com/videos/$id",
-                $headers
+                [
+                    'http_errors' => true,
+                    'headers' => [
+                        'Accept' => 'application/json',
+                        'Authorization' => 'Bearer ' . $this->token
+                    ]
+                ]
             );
-        } catch (\Requests_Exception $e) {
-            // Total network failure
-            $this->throwError(
-                sprintf(
-                    "VimeoEmbed Network Error: %s",
-                    $vimeoInfo->getMessage()
-                )
-            );
-            $request = $e;
+            $errMsg = ['error' => "JSON decoding error"];
+            $result = json_decode($request->getBody()) || $errMsg;
+        } catch (RequestException $e) {
+            $errMsg = Psr7\str($e->getRequest());
+            if ($e->hasResponse()) {
+                $errMsg = Psr7\str($e->getResponse());
+            }
+            $errMsg = "VimeoEmbed Network Error: $errMsg";
+            $this->throwError($errMsg);
+            $result = ['error' => $errMsg];
         }
-        return json_decode($request->body);
+        return $result;
     }
 }

@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  test:
+    image: composer
+    volumes: 
+      - .:/app
+    command: /app/vendor/bin/phpunit --colors=always --verbose tests
+
+  composer:
+    image: composer
+    volumes:
+      - ./:/app

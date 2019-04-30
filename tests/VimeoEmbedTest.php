@@ -4,7 +4,15 @@ namespace ideasonpurpose;
 
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
-use Requests;
+
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Exception\RequestException;
+
+// use Requests;
 
 // It should wrap Vimeo's embed code
 
@@ -18,23 +26,23 @@ use Requests;
 // it should store the API response in a transient
 // it should fail on network errors
 
-
 class VimeoEmbedTest extends TestCase
 {
-    public function setUp()
+    protected function setUp(): void
     {
-        global $stub;
+        global $stub, $req;
         $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
             ->disableOriginalConstructor()
             ->setMethods(['apiGet'])
             ->getMock();
 
-        $stub->method('apiGet')
-            ->willReturn((object)['name' => 'vimeo' ]);
+        $stub->method('apiGet')->willReturn((object) ['name' => 'vimeo']);
 
         Functions\when('set_transient')->justReturn(true);
         Functions\when('get_transient')->justReturn(false);
         Functions\when('delete_transient')->justReturn(true);
+        Functions\when('add_shortcode')->justReturn(true);
+        Functions\when('add_action')->justReturn(true);
         parent::setUp();
     }
 
@@ -71,10 +79,12 @@ class VimeoEmbedTest extends TestCase
     public function testGetVimeoIdFromEmbedCode()
     {
         global $stub;
-        $oEmbedBlob = '<iframe src="https://player.vimeo.com/video/216711407" width="519" height="390" frameborder="0" title="Navigators 2016 Digital Annual Report" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+        $oEmbedBlob =
+            '<iframe src="https://player.vimeo.com/video/216711407" width="519" height="390" frameborder="0" title="Navigators 2016 Digital Annual Report" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
         $this->assertEquals('216711407', $stub->getVimeoData($oEmbedBlob)->id);
 
-        $oEmbedBlob = '<iframe src="https://player.vimeo.com/video/2822787?color=ffffff&title=0&portrait=0" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
+        $oEmbedBlob =
+            '<iframe src="https://player.vimeo.com/video/2822787?color=ffffff&title=0&portrait=0" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';
         $this->assertEquals('2822787', $stub->getVimeoData($oEmbedBlob)->id);
     }
 
@@ -83,12 +93,12 @@ class VimeoEmbedTest extends TestCase
      *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
-     * @expectedException \Exception
      */
     public function testGetVimeoIdFailWithException()
     {
         define('WP_DEBUG', true);
         global $stub;
+        $this->expectException(\Exception::class);
         $stub->getVimeoData(null);
         $stub->getVimeoData('');
     }
@@ -98,7 +108,7 @@ class VimeoEmbedTest extends TestCase
      *
      * @runInSeparateProcess
      * @preserveGlobalState disabled
-          */
+     */
     public function testGetVimeoIdFailWithComment()
     {
         global $stub;
@@ -115,18 +125,28 @@ class VimeoEmbedTest extends TestCase
      */
     public function testVimeoAPIError()
     {
+        define('WP_DEBUG', true);
 
         $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
             ->disableOriginalConstructor()
-            ->setMethods(['apiGet'])
+            ->setMethodsExcept(['apiGet', 'throwError'])
             ->getMock();
 
-        $stub->method('apiGet')
-            ->willReturn((object)['pictures' => 'vimeo', 'error' => 'API Error' ]);
+        $mock = new MockHandler([
+            new Response(500, [], "testing"),
+            new RequestException(
+                "Error Communicating with Server",
+                new Request('GET', 'test')
+            )
+        ]);
+        $handler = HandlerStack::create($mock);
+        $stub->client = new Client(['handler' => $handler]);
+        $this->expectException(\Exception::class);
+        $stub->apiGet('500 error');
 
-        $this->assertRegExp('/API Error/', $stub->getVimeoData(123));
+        $this->expectException(\Exception::class);
+        $stub->apiGet('throw exception');
     }
-
 
     /**
      * it should create a video tag embed with the loop attribute
@@ -140,13 +160,29 @@ class VimeoEmbedTest extends TestCase
             ->setMethods(['getVimeoData', 'divStart'])
             ->getMock();
 
-        $stub->method('getVimeoData')
-            ->willReturn((object)['files' => 'files array', 'pictures' => (object) ['sizes' => 'pictures array'] ]);
+        $stub->method('getVimeoData')->willReturn(
+            (object) [
+                'files' => 'files array',
+                'pictures' => (object) ['sizes' => 'pictures array']
+            ]
+        );
 
-        $this->assertRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => true]));
-        $this->assertNotRegExp('/autoplay/', $stub->embed(1234, ['autoplay' => false]));
-        $this->assertRegExp('/muted/', $stub->embed(1234, ['autoplay' => true]));
-        $this->assertRegExp('/playsinline/', $stub->embed(1234, ['autoplay' => true]));
+        $this->assertRegExp(
+            '/autoplay/',
+            $stub->embed(1234, ['autoplay' => true])
+        );
+        $this->assertNotRegExp(
+            '/autoplay/',
+            $stub->embed(1234, ['autoplay' => false])
+        );
+        $this->assertRegExp(
+            '/muted/',
+            $stub->embed(1234, ['autoplay' => true])
+        );
+        $this->assertRegExp(
+            '/playsinline/',
+            $stub->embed(1234, ['autoplay' => true])
+        );
 
         $this->assertRegExp('/loop/', $stub->embed(1234, ['loop' => true]));
         $this->assertNotRegExp('/loop/', $stub->embed(1234, ['loop' => false]));
@@ -155,7 +191,11 @@ class VimeoEmbedTest extends TestCase
     public function testDivStart()
     {
         global $stub;
-        $fakeData = (object)['width' => 16, 'height' => 9, 'embed' => (object) ['html' => 'html body']];
+        $fakeData = (object) [
+            'width' => 16,
+            'height' => 9,
+            'embed' => (object) ['html' => 'html body']
+        ];
         $div = $stub->divStart($fakeData);
         $this->assertRegExp('/<style>/', $div);
         $this->assertRegExp('/<div id="vimeo-embed/', $div);
@@ -164,7 +204,11 @@ class VimeoEmbedTest extends TestCase
     public function testDivStartNoStyle()
     {
         global $stub;
-        $fakeData = (object)['width' => 16, 'height' => 9, 'embed' => (object) ['html' => 'html body']];
+        $fakeData = (object) [
+            'width' => 16,
+            'height' => 9,
+            'embed' => (object) ['html' => 'html body']
+        ];
         $div = $stub->divStart($fakeData, false);
         $this->assertNotRegExp('/<style>/', $div);
         $this->assertNotRegExp('/<div id="vimeo-embed/', $div);

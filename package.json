@@ -23,12 +23,17 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "./vendor/bin/phpunit --colors=always tests",
+    "test_old": "./vendor/bin/phpunit --colors=always tests",
+    "test": "docker-compose run test",
     "version": "version-everything && git add -u",
-    "watch": "watch -f '**/*.php' -r './vendor/bin/phpunit --colors=always tests'"
+    "watch_old": "watch -f '**/*.php' -r './vendor/bin/phpunit --colors=always tests'",
+    "watch": "watch -f '**/*.php' -r 'npm run test'",
+    "prettier": "prettier"
   },
   "devDependencies": {
+    "@prettier/plugin-php": "^0.10.2",
     "cli-watch": "^1.0.7",
+    "prettier": "^1.17.0",
     "version-everything": "^0.2.2"
   },
   "version_files": [
