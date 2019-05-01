@@ -6,12 +6,13 @@ php:
   - 7.2
   - 7.3
 
-before_script:
+install:
   - composer self-update
   - composer install --prefer-source --no-interaction
-  - mkdir -p build/logs
 
-script: vendor/bin/phpunit tests --whitelist src --coverage-clover build/logs/clover.xml
+script: 
+  - mkdir -p build/logs
+  - vendor/bin/phpunit tests --whitelist src --coverage-clover build/logs/clover.xml
 
 after_success:
-  - travis_retry php vendor/bin/coveralls -v
+  - travis_retry vendor/bin/coveralls -v
