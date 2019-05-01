@@ -342,6 +342,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $vimeoInfo = get_transient($transientID);
         if ($vimeoInfo === false) {
             $vimeoInfo = $this->apiGet($videoID);
+            // print_r($vimeoInfo);
             $vimeoInfo->id = $videoID;
             $vimeoInfo->transient = $transientID;
 
@@ -398,7 +399,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                 ]
             );
             $errMsg = ['error' => "JSON decoding error"];
-            $result = json_decode($request->getBody()) || $errMsg;
+            $result = json_decode($request->getBody()) ?: $errMsg;
         } catch (RequestException $e) {
             $errMsg = Psr7\str($e->getRequest());
             if ($e->hasResponse()) {

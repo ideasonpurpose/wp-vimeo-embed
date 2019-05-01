@@ -133,6 +133,7 @@ class VimeoEmbedTest extends TestCase
             ->getMock();
 
         $mock = new MockHandler([
+            new Response(200, [], '{"id": 123, "name":"test video"}'),
             new Response(500, [], "testing"),
             new RequestException(
                 "Error Communicating with Server",
@@ -142,11 +143,14 @@ class VimeoEmbedTest extends TestCase
         $handler = HandlerStack::create($mock);
         $stub->client = new Client(['handler' => $handler]);
         $stub->token = '123456789abcdefg';
+        $this->assertIsObject($stub->apiGet('returns an object'));
+
         $this->expectException(\Exception::class);
         $stub->apiGet('500 error');
 
         $this->expectException(\Exception::class);
         $stub->apiGet('throw exception');
+
     }
 
     /**
