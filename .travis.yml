@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 language: php
 
 php:
@@ -8,9 +8,8 @@ php:
   - nightly
 
 before_script:
-  - yarn
   - composer self-update
-  - composer install --prefer-source --no-interaction --dev
+  - composer install --prefer-source --no-interaction
   - mkdir -p build/logs
 
 script: vendor/bin/phpunit tests --whitelist src --coverage-clover build/logs/clover.xml
