@@ -141,6 +141,7 @@ class VimeoEmbedTest extends TestCase
         ]);
         $handler = HandlerStack::create($mock);
         $stub->client = new Client(['handler' => $handler]);
+        $stub->token = '123456789abcdefg';
         $this->expectException(\Exception::class);
         $stub->apiGet('500 error');
 
