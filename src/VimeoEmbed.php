@@ -44,7 +44,7 @@ class VimeoEmbed
         $jsPath = implode('/', [
             get_stylesheet_directory_uri(),
             $relVendorPath,
-            '/js/init.js'
+            'js/init.js'
         ]);
 
         wp_enqueue_script(__CLASS__, $jsPath, ['jquery'], $this->version, true);
