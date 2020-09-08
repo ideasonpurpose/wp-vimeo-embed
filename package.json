@@ -23,18 +23,44 @@
     "test": "tests"
   },
   "scripts": {
-    "test_old": "./vendor/bin/phpunit --colors=always tests",
-    "test": "docker-compose run test",
-    "version": "version-everything && git add -u",
-    "watch_old": "watch -f '**/*.php' -r './vendor/bin/phpunit --colors=always tests'",
-    "watch": "watch -f '**/*.php' -r 'npm run test'",
-    "prettier": "prettier"
+    "composer": "npm run composer:install",
+    "composer:install": "docker-compose run --rm composer",
+    "composer:require": "docker-compose run --rm composer require",
+    "composer:update": "docker-compose run --rm composer update",
+    "test": "docker-compose run --rm  test",
+    "version": "version-everything && auto-changelog && git add -u",
+    "watch": "watch -f '**/*.php' -r 'npm run test'"
+  },
+  "prettier": {
+    "overrides": [
+      {
+        "files": "*.html",
+        "options": {
+          "printWidth": 100,
+          "tabWidth": 2
+        }
+      },
+      {
+        "files": "*.php",
+        "options": {
+          "printWidth": 100,
+          "singleQuote": true,
+          "tabWidth": 4,
+          "trailingCommaPHP": true
+        }
+      }
+    ]
   },
   "devDependencies": {
-    "@prettier/plugin-php": "^0.10.2",
+    "@prettier/plugin-php": "^0.14.3",
+    "auto-changelog": "^2.2.0",
     "cli-watch": "^1.0.7",
-    "prettier": "^1.17.0",
-    "version-everything": "^0.2.2"
+    "prettier": "^2.0.5",
+    "version-everything": "^0.6.3"
+  },
+  "auto-changelog": {
+    "package": true,
+    "commitLimit": 7
   },
   "version_files": [
     "README.md",

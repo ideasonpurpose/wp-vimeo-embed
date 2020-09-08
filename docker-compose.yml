@@ -3,11 +3,14 @@ version: "3.5"
 services:
   test:
     image: composer
+    user: '${UID:-1000}:${GID:-1000}'    
     volumes: 
       - .:/app
     command: /app/vendor/bin/phpunit --colors=always --verbose tests
 
   composer:
     image: composer
+    user: '${UID:-1000}:${GID:-1000}'    
     volumes:
       - ./:/app
+    command: install
