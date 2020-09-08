@@ -36,7 +36,7 @@ $(function () {
         backgroundPosition: '50%'
       });
 
-      $e.append('<source src="' + getItemToFit(e, data.files).link + '">');
+      $e.append('<source src="' + getItemToFit(e, data.files).link_secure + '">');
       $e.on('canplay', function (event) {
         var canPlayTime = event.target.currentTime;
         setTimeout(function () {
