@@ -31,25 +31,19 @@ class VimeoEmbed
         )->version;
         add_shortcode('vimeo', [$this, 'parseShortcode']);
         add_action('wp_enqueue_scripts', [$this, 'fitScript']);
-        add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
+        // add_action('wp_enqueue_scripts', [$this, 'loadLightboxAssets']);
     }
 
     public function fitScript()
     {
         // get relative path to this vendor subdirectory
-        $relVendorPath = trim(
-            str_replace(get_stylesheet_directory(), '', __DIR__),
-            '/'
-        );
-        $jsPath = implode('/', [
-            get_stylesheet_directory_uri(),
-            $relVendorPath,
-            'js/init.js'
-        ]);
+        $relVendorPath = trim(str_replace(get_stylesheet_directory(), '', __DIR__), '/');
+        $jsPath = implode('/', [get_stylesheet_directory_uri(), $relVendorPath, 'js/init.js']);
 
         wp_enqueue_script(__CLASS__, $jsPath, ['jquery'], $this->version, true);
         // wp_enqueue_style('ekko-lightbox-styles', 'https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.1.1/ekko-lightbox.min.css', [], null);
     }
+
     public function loadLightboxAssets()
     {
         wp_enqueue_style(
@@ -109,7 +103,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
             0
         );
         $srcset = array_map(function ($i) {
-            return sprintf("%s %dw", $i->link, $i->width);
+            return sprintf('%s %dw', $i->link, $i->width);
         }, $vimeoInfo->pictures->sizes);
         return sprintf(
             '<img src="%1$s" alt="%2$s" width="%3$d", height="%4$d" srcset="%5$s", sizes="(max-width: %6$dpx) 100vw, %6$dpx">',
@@ -141,9 +135,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                 : 0;
 
         if ($includeStyle) {
-            $id =
-                'vimeo-embed-' .
-                substr(md5($vimeoData->embed->html . microtime()), 0, 12);
+            $id = 'vimeo-embed-' . substr(md5($vimeoData->embed->html . microtime()), 0, 12);
             $style = "
                 <style>
                     #$id {
@@ -170,11 +162,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $div = "
             <div ${id}class=\"embed-container\">
         ";
-        $style = preg_replace(
-            ['/\s+/', '/\s?([{<>}])\s?/'],
-            [' ', '$1'],
-            $style
-        );
+        $style = preg_replace(['/\s+/', '/\s?([{<>}])\s?/'], [' ', '$1'], $style);
         return $style . $div;
     }
 
@@ -198,24 +186,18 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $vimeoData = $this->getVimeoData($video);
         $defaults = [
             'autoplay' => true,
-            'loop' => true
+            'loop' => true,
         ];
         $config = array_merge($defaults, $args);
 
-        $config['autoplay'] = $config['autoplay']
-            ? 'autoplay muted playsinline'
-            : '';
+        $config['autoplay'] = $config['autoplay'] ? 'autoplay muted playsinline' : '';
         $config['loop'] = $config['loop'] ? 'loop' : '';
 
         $output = sprintf(
             '<video %s %s data-pictures="%s" data-files="%s"></video>',
             $config['autoplay'],
             $config['loop'],
-            htmlentities(
-                json_encode($vimeoData->pictures->sizes),
-                ENT_QUOTES,
-                'UTF-8'
-            ),
+            htmlentities(json_encode($vimeoData->pictures->sizes), ENT_QUOTES, 'UTF-8'),
             htmlentities(json_encode($vimeoData->files), ENT_QUOTES, 'UTF-8')
         );
 
@@ -254,7 +236,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
 
         $config = [
             'loop' => in_array('loop', $atts),
-            'autoplay' => in_array('autoplay', $atts)
+            'autoplay' => in_array('autoplay', $atts),
         ];
         // d($atts, $config);
 
@@ -266,6 +248,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         // $loop = (in_array('loop', $atts)) ? 'loop' : '';
         // $autoplay = (in_array('autoplay', $atts)) ? 'autoplay' : '';
     }
+
     /**
      * Vimeo embed shortcode.
      * This is fluid and will scale with the page width.
@@ -291,11 +274,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
         $output .= sprintf(
             '<video autoplay muted playsinline id="%s" data-pictures="%s" data-files="%s" %s></video>',
             $data->id,
-            htmlentities(
-                json_encode($data->pictures->sizes),
-                ENT_QUOTES,
-                'UTF-8'
-            ),
+            htmlentities(json_encode($data->pictures->sizes), ENT_QUOTES, 'UTF-8'),
             htmlentities(json_encode($data->files), ENT_QUOTES, 'UTF-8'),
             $loop
         );
@@ -326,9 +305,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
          * Handle bad input
          */
         if (!$videoID) {
-            return $this->throwError(
-                "VimeoEmbed Error: Unable to extract Vimeo ID from input"
-            );
+            return $this->throwError('VimeoEmbed Error: Unable to extract Vimeo ID from input');
         }
 
         /**
@@ -358,7 +335,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
             if (property_exists($vimeoInfo, 'error')) {
                 return $this->throwError(
                     sprintf(
-                        "VimeoEmbed API Error: %s",
+                        'VimeoEmbed API Error: %s',
                         @$vimeoInfo->developer_message2 ?: $vimeoInfo->error
                     )
                 );
@@ -370,9 +347,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
                 property_exists($vimeoInfo, 'pictures') &&
                 !property_exists($vimeoInfo->pictures, 'sizes')
             ) {
-                return $this->throwError(
-                    "VimeoEmbed API Error: Missing Files Array"
-                );
+                return $this->throwError('VimeoEmbed API Error: Missing Files Array');
             }
         }
         return $vimeoInfo;
@@ -387,18 +362,14 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
     {
         $result = false;
         try {
-            $request = $this->client->request(
-                'GET',
-                "https://api.vimeo.com/videos/$id",
-                [
-                    'http_errors' => true,
-                    'headers' => [
-                        'Accept' => 'application/json',
-                        'Authorization' => 'Bearer ' . $this->token
-                    ]
-                ]
-            );
-            $errMsg = ['error' => "JSON decoding error"];
+            $request = $this->client->request('GET', "https://api.vimeo.com/videos/$id", [
+                'http_errors' => true,
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $this->token,
+                ],
+            ]);
+            $errMsg = ['error' => 'JSON decoding error'];
             $result = json_decode($request->getBody()) ?: $errMsg;
         } catch (RequestException $e) {
             $errMsg = Psr7\str($e->getRequest());
