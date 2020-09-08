@@ -25,9 +25,9 @@
     }
   },
   "require-dev": {
-    "brain/monkey": "^2.2",
-    "php-coveralls/php-coveralls": "^2.1",
-    "phpunit/phpunit": "^7"
+    "brain/monkey": "^2.4",
+    "php-coveralls/php-coveralls": "^2.2",
+    "phpunit/phpunit": "^9"
   },
   "require": {
     "guzzlehttp/guzzle": "^6.3",

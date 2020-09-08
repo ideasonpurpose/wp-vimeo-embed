@@ -112,8 +112,8 @@ class VimeoEmbedTest extends TestCase
     public function testGetVimeoIdFailWithComment()
     {
         global $stub;
-        $this->assertRegExp('/<!--/', $stub->getVimeoData(null));
-        $this->assertRegExp('/<!--/', $stub->getVimeoData(''));
+        $this->assertMatchesRegularExpression('/<!--/', $stub->getVimeoData(null));
+        $this->assertMatchesRegularExpression('/<!--/', $stub->getVimeoData(''));
         // TODO: Test for a malformed data set with a missing Vimeo->Pictures->sizes array
     }
 
@@ -134,11 +134,8 @@ class VimeoEmbedTest extends TestCase
 
         $mock = new MockHandler([
             new Response(200, [], '{"id": 123, "name":"test video"}'),
-            new Response(500, [], "testing"),
-            new RequestException(
-                "Error Communicating with Server",
-                new Request('GET', 'test')
-            )
+            new Response(500, [], 'testing'),
+            new RequestException('Error Communicating with Server', new Request('GET', 'test')),
         ]);
         $handler = HandlerStack::create($mock);
         $stub->client = new Client(['handler' => $handler]);
@@ -150,7 +147,6 @@ class VimeoEmbedTest extends TestCase
 
         $this->expectException(\Exception::class);
         $stub->apiGet('throw exception');
-
     }
 
     /**
@@ -162,35 +158,33 @@ class VimeoEmbedTest extends TestCase
     {
         $stub = $this->getMockBuilder('ideasonpurpose\VimeoEmbed')
             ->disableOriginalConstructor()
-            ->setMethods(['getVimeoData', 'divStart'])
+            // ->setMethods(['getVimeoData', 'divStart'])
+            ->onlyMethods(['getVimeoData', 'divStart'])
             ->getMock();
 
         $stub->method('getVimeoData')->willReturn(
             (object) [
                 'files' => 'files array',
-                'pictures' => (object) ['sizes' => 'pictures array']
+                'pictures' => (object) ['sizes' => 'pictures array'],
             ]
         );
 
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression(
             '/autoplay/',
             $stub->embed(1234, ['autoplay' => true])
         );
-        $this->assertNotRegExp(
+        $this->assertDoesNotMatchRegularExpression(
             '/autoplay/',
             $stub->embed(1234, ['autoplay' => false])
         );
-        $this->assertRegExp(
-            '/muted/',
-            $stub->embed(1234, ['autoplay' => true])
-        );
-        $this->assertRegExp(
+        $this->assertMatchesRegularExpression('/muted/', $stub->embed(1234, ['autoplay' => true]));
+        $this->assertMatchesRegularExpression(
             '/playsinline/',
             $stub->embed(1234, ['autoplay' => true])
         );
 
-        $this->assertRegExp('/loop/', $stub->embed(1234, ['loop' => true]));
-        $this->assertNotRegExp('/loop/', $stub->embed(1234, ['loop' => false]));
+        $this->assertMatchesRegularExpression('/loop/', $stub->embed(1234, ['loop' => true]));
+        $this->assertDoesNotMatchRegularExpression('/loop/', $stub->embed(1234, ['loop' => false]));
     }
 
     public function testDivStart()
@@ -199,11 +193,11 @@ class VimeoEmbedTest extends TestCase
         $fakeData = (object) [
             'width' => 16,
             'height' => 9,
-            'embed' => (object) ['html' => 'html body']
+            'embed' => (object) ['html' => 'html body'],
         ];
         $div = $stub->divStart($fakeData);
-        $this->assertRegExp('/<style>/', $div);
-        $this->assertRegExp('/<div id="vimeo-embed/', $div);
+        $this->assertMatchesRegularExpression('/<style>/', $div);
+        $this->assertMatchesRegularExpression('/<div id="vimeo-embed/', $div);
     }
 
     public function testDivStartNoStyle()
@@ -212,11 +206,11 @@ class VimeoEmbedTest extends TestCase
         $fakeData = (object) [
             'width' => 16,
             'height' => 9,
-            'embed' => (object) ['html' => 'html body']
+            'embed' => (object) ['html' => 'html body'],
         ];
         $div = $stub->divStart($fakeData, false);
-        $this->assertNotRegExp('/<style>/', $div);
-        $this->assertNotRegExp('/<div id="vimeo-embed/', $div);
-        $this->assertRegExp('/<div class="embed-container/', $div);
+        $this->assertDoesNotMatchRegularExpression('/<style>/', $div);
+        $this->assertDoesNotMatchRegularExpression('/<div id="vimeo-embed/', $div);
+        $this->assertMatchesRegularExpression('/<div class="embed-container/', $div);
     }
 }
