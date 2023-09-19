@@ -31,32 +31,14 @@
     "version": "version-everything && auto-changelog && git add -u",
     "watch": "watch -f '**/*.php' -r 'npm run test'"
   },
-  "prettier": {
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "printWidth": 100,
-          "tabWidth": 2
-        }
-      },
-      {
-        "files": "*.php",
-        "options": {
-          "printWidth": 100,
-          "singleQuote": true,
-          "tabWidth": 4,
-          "trailingCommaPHP": true
-        }
-      }
-    ]
-  },
+  "prettier": "@ideasonpurpose/prettier-config",
   "devDependencies": {
-    "@prettier/plugin-php": "^0.14.3",
+    "@ideasonpurpose/prettier-config": "^0.0.4",
+    "@prettier/plugin-php": "^0.20.1",
     "auto-changelog": "^2.2.0",
     "cli-watch": "^1.0.7",
-    "prettier": "^2.0.5",
-    "version-everything": "^0.6.3"
+    "prettier": "^3.0.3",
+    "version-everything": "^0.11.0"
   },
   "auto-changelog": {
     "package": true,

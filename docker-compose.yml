@@ -1,6 +1,16 @@
-version: "3.5"
 
 services:
+  composer:
+    # https://hub.docker.com/_/composer
+    image: composer:2.6
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      COMPOSER_HOME: /.composer
+    volumes:
+      - ./:/app
+      - ~/.composer:/.composer
+    command: install
+
   test:
     image: composer
     user: '${UID:-1000}:${GID:-1000}'    
@@ -8,9 +18,3 @@ services:
       - .:/app
     command: /app/vendor/bin/phpunit --colors=always --verbose tests
 
-  composer:
-    image: composer
-    user: '${UID:-1000}:${GID:-1000}'    
-    volumes:
-      - ./:/app
-    command: install

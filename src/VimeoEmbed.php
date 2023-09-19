@@ -18,6 +18,11 @@ use GuzzleHttp\Exception\RequestException;
  */
 class VimeoEmbed
 {
+
+    public $client;
+    public $token;
+    public $version;
+
     /**
      * Initialize the library
      * @param [type] $token Auth token from https://developer.vimeo.com/apps/89792#authentication
