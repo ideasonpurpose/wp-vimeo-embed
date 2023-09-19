@@ -44,8 +44,10 @@
     "package": true,
     "commitLimit": 7
   },
-  "version_files": [
-    "README.md",
-    "src/VimeoEmbed.php"
-  ]
+  "version-everything": {
+    "files": [
+      "README.md",
+      "src/VimeoEmbed.php"
+    ]
+  }
 }

@@ -32,6 +32,5 @@
   "require": {
     "guzzlehttp/guzzle": "^6.3",
     "wikimedia/relpath": "^2.1"
-  },
-  "version": "0.3.3"
+  }
 }
