@@ -165,7 +165,7 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
             $id = "id=\"$id\" ";
         }
         $div = "
-            <div ${id}class=\"embed-container\">
+            <div {$id}class=\"embed-container\">
         ";
         $style = preg_replace(['/\s+/', '/\s?([{<>}])\s?/'], [' ', '$1'], $style);
         return $style . $div;
