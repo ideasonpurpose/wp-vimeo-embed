@@ -6,7 +6,7 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 
 /**
- * version: 0.3.5
+ * version: 0.3.6
  *
  * Shortcode takes arguments:
  * [vimeo 1234567]   -- straight embed, stretches to 100% width
